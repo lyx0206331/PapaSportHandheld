@@ -1,0 +1,41 @@
+ext {
+    //表示是作为module还是application
+    isModule = true
+    //applicationId版本好sdkVersion统一管理
+    android = [
+            compileSdkVersion           : 28,
+            buildToolsVersion           : "29.0.2",
+            applicationId               : "com.papa.handheld",
+            minSdkVersion               : 21,
+            targetSdkVersion            : 28,
+            versionCode                 : 5,
+            versionName                 : "0.0.2"
+    ]
+
+    def KOTLIN_ANKO_VERSION = "0.10.8"
+    def FAST_JSON_VERSION = "1.1.71.android"
+
+    def AGENT_WEB_VERSION = "4.0.3-beta"
+
+    def LEAK_CANARY_VERSION = "2.0-alpha-2"
+    def TWINKLING_REFRESH_VERSION = "1.0.7"
+    def SONIC_VERSION = "2.0.0"
+    def SMART_REFRESH_VERSION = "1.0.3"
+
+    dependencies = [
+
+            androidAppCompatV7      : 'com.android.support:appcompat-v7:28.0.0',
+            androidSupportV4        : 'com.android.support:support-v4:28.0.0',
+            androidSupportDesign    : 'com.android.support:design:28.0.0',
+
+            kotlinAnko              : 'org.jetbrains.anko:anko:' + KOTLIN_ANKO_VERSION,
+            fastJson                : 'com.alibaba:fastjson:' + FAST_JSON_VERSION,
+
+            smartRefreshLayout      : 'com.scwang.smartrefresh:SmartRefreshLayout:' + SMART_REFRESH_VERSION,
+            smartRefreshHeader      : 'com.scwang.smartrefresh:SmartRefreshHeader:' + SMART_REFRESH_VERSION,
+            leakCanary              : 'com.squareup.leakcanary:leakcanary-android:' + LEAK_CANARY_VERSION,
+            agentWeb                : 'com.just.agentweb:agentweb:' + AGENT_WEB_VERSION,
+            twinklingRefreshLayout  : 'com.lcodecorex:tkrefreshlayout:' + TWINKLING_REFRESH_VERSION,
+            tencentSonic            : 'com.tencent.sonic:sdk:' + SONIC_VERSION
+    ]
+}

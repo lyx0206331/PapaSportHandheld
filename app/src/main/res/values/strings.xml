@@ -1,3 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PapaSport</string>
+    <string name="app_name">PapaSports</string>
+    <string name="welcome">Welcome to Papa</string>
+    <string name="id_identification">身份证识别</string>
+
+    <string name="close_tips">您确定要关闭该页面吗？</string>
+    <string name="confirm">确定</string>
+    <string name="cancel">取消</string>
+    <string name="quit">退出</string>
 </resources>
