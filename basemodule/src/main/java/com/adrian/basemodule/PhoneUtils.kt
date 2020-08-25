@@ -1,8 +1,8 @@
 package com.adrian.basemodule
 
 import android.content.Context
-import android.support.annotation.RequiresPermission
 import android.telephony.TelephonyManager
+import androidx.annotation.RequiresPermission
 
 /**
  * date:2019/7/4 16:15

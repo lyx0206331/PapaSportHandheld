@@ -7,13 +7,13 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.FrameLayout
+import androidx.core.content.ContextCompat
 import com.adrian.basemodule.LogUtils.logE
 import com.adrian.basemodule.PermissionUtil
 import com.adrian.basemodule.PhoneUtils
@@ -24,7 +24,7 @@ import com.just.agentweb.*
 import com.papa.handheld.model.DeviceInfo
 import com.papa.handheld.model.PrintInfo
 import com.papa.handheld.view.SmartRefreshWebLayout
-import com.scwang.smartrefresh.layout.SmartRefreshLayout
+import com.scwang.smart.refresh.layout.SmartRefreshLayout
 import kotlinx.android.synthetic.main.activity_base_web.*
 
 class MainActivity : BaseWebActivity() {

@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import com.just.agentweb.IWebLayout
 import com.papa.handheld.R
-import com.scwang.smartrefresh.layout.SmartRefreshLayout
+import com.scwang.smart.refresh.layout.SmartRefreshLayout
 
 /**
  * TODO: document your custom view class.

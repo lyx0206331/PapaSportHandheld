@@ -2,11 +2,11 @@ package com.papa.handheld
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.support.annotation.ColorInt
 import android.view.KeyEvent
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.FrameLayout
+import androidx.annotation.ColorInt
 import com.adrian.basemodule.BaseActivity
 import com.just.agentweb.*
 

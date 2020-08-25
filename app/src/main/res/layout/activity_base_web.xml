@@ -9,7 +9,7 @@
     android:fitsSystemWindows="true"
     tools:context=".BaseWebActivity">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:actionBarSize"
@@ -45,6 +45,6 @@
             android:layout_marginRight="17dp"
             android:visibility="gone"
             android:src="@mipmap/home" />
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
 </LinearLayout>

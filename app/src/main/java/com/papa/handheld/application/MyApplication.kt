@@ -2,8 +2,8 @@ package com.papa.handheld.application
 
 import android.content.Context
 import android.content.MutableContextWrapper
-import android.support.multidex.MultiDex
 import android.webkit.WebView
+import androidx.multidex.MultiDex
 import com.adrian.basemodule.BaseApplication
 
 /**

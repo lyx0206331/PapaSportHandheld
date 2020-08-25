@@ -1,3 +1,4 @@
+include ':sunmiprinterdemo'
 include ':basemodule'
 include ':app'
 rootProject.name = "PapaSport"
