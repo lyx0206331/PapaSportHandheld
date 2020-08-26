@@ -204,7 +204,8 @@ class MainActivity : BaseWebActivity() {
                 logE(TAG, "onPageFinished. url: $url")
                 when {
                     url?.endsWith("login").orFalse() -> {
-                        val deviceInfoJson = JSON.toJSONString(DeviceInfo(PhoneUtils.getImeiNum()))
+                        val deviceInfoJson =
+                            JSON.toJSONString(DeviceInfo(PhoneUtils.getDeviceId(this@MainActivity)))
                         logE(TAG, deviceInfoJson)
                         agentWeb.jsAccessEntrace.quickCallJs(
                             "getImei",

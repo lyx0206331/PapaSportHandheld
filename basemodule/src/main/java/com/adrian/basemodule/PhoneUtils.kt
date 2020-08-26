@@ -1,6 +1,7 @@
 package com.adrian.basemodule
 
 import android.content.Context
+import android.provider.Settings
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 
@@ -15,5 +16,9 @@ object PhoneUtils {
         val tm =
             BaseApplication.instance.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         return tm.deviceId.orEmpty()
+    }
+
+    fun getDeviceId(context: Context): String {
+        return Settings.System.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     }
 }

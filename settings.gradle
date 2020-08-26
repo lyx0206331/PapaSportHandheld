@@ -1,3 +1,4 @@
+include ':sunmisacannerdemo'
 include ':sunmiprinterdemo'
 include ':basemodule'
 include ':app'
