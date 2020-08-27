@@ -19,6 +19,7 @@
         android:icon="@mipmap/logo_papasports"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
         <activity
             android:name=".WelcomeActivity"

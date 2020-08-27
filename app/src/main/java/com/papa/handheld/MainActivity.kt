@@ -7,13 +7,13 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import com.adrian.basemodule.LogUtils
 import com.adrian.basemodule.LogUtils.logE
 import com.adrian.basemodule.PermissionUtil
 import com.adrian.basemodule.PhoneUtils
@@ -52,7 +52,7 @@ class MainActivity : BaseWebActivity() {
         }
         super.onCreate(savedInstanceState)
 
-        setSupportActionBar(toolbar)
+        /*setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
         toolbar.setBackgroundResource(R.color.title_bg_color)
@@ -67,7 +67,7 @@ class MainActivity : BaseWebActivity() {
         ibHome.setOnClickListener {
             agentWeb.jsAccessEntrace.quickCallJs("linkToHome")
         }
-
+*/
         permissionUtil.requestPermission(permissions, object : PermissionUtil.IPermissionCallback {
             override fun allowedPermissions() {
                 logE("req permission", "permissions1")
@@ -175,7 +175,7 @@ class MainActivity : BaseWebActivity() {
         return object : WebChromeClient() {
             override fun onReceivedTitle(view: WebView?, title: String?) {
                 super.onReceivedTitle(view, title)
-                tvTitle?.text = title
+//                tvTitle?.text = title
             }
         }
     }
@@ -211,19 +211,19 @@ class MainActivity : BaseWebActivity() {
                             "getImei",
                             deviceInfoJson
                         )
-                        toolbar.visibility = View.GONE
-                        ibHome.visibility = View.GONE
-                        btnQuit.visibility = View.GONE
+//                        toolbar.visibility = View.GONE
+//                        ibHome.visibility = View.GONE
+//                        btnQuit.visibility = View.GONE
                     }
                     url?.endsWith("index").orFalse() -> {
-                        toolbar.visibility = View.VISIBLE
-                        btnQuit.visibility = View.VISIBLE
-                        ibHome.visibility = View.GONE
+//                        toolbar.visibility = View.VISIBLE
+//                        btnQuit.visibility = View.VISIBLE
+//                        ibHome.visibility = View.GONE
                     }
                     else -> {
-                        toolbar.visibility = View.VISIBLE
-                        btnQuit.visibility = View.GONE
-                        ibHome.visibility = View.VISIBLE
+//                        toolbar.visibility = View.VISIBLE
+//                        btnQuit.visibility = View.GONE
+//                        ibHome.visibility = View.VISIBLE
                     }
                 }
                 curUrl = url
@@ -269,7 +269,10 @@ class MainActivity : BaseWebActivity() {
     }
 
     override fun getPermissionInterceptor(): PermissionInterceptor? {
-        return null
+        return PermissionInterceptor { url, permissions, action ->
+            LogUtils.logE(TAG, "url:$url permission:$permissions action:$action")
+            false
+        }
     }
 
     override fun getAgentWebUIController(): AgentWebUIControllerImplBase? {
@@ -285,11 +288,11 @@ class MainActivity : BaseWebActivity() {
     }
 
     override fun getUrl(): String {
-        //https://m.jd.com/
+        //papa 123456
         return if (BuildConfig.DEBUG) {
-            "http://pda.test.papasports.com.cn"
+            "http://demo.handtest.papa.com.cn:8280"
         } else {
-            "https://pda.papa.com.cn"
+            "http://papa.hand.ppdev.fun:8180"
         }
 //        return "https://pda.papa.com.cn"
 //        return "http://192.168.1.12:8039"

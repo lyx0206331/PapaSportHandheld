@@ -8,6 +8,7 @@ import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import com.adrian.basemodule.BaseActivity
+import com.adrian.basemodule.LogUtils
 import com.just.agentweb.*
 
 /**
@@ -36,6 +37,7 @@ abstract class BaseWebActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         buildAgentWeb()
+        LogUtils.logE("Url", getUrl())
     }
 
     private fun buildAgentWeb() {
