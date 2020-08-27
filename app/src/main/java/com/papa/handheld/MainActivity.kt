@@ -13,7 +13,6 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
-import com.adrian.basemodule.LogUtils
 import com.adrian.basemodule.LogUtils.logE
 import com.adrian.basemodule.PermissionUtil
 import com.adrian.basemodule.PhoneUtils
@@ -23,6 +22,7 @@ import com.alibaba.fastjson.JSON
 import com.just.agentweb.*
 import com.papa.handheld.model.DeviceInfo
 import com.papa.handheld.model.PrintInfo
+import com.papa.handheld.model.ScanInfo
 import com.papa.handheld.view.SmartRefreshWebLayout
 import com.scwang.smart.refresh.layout.SmartRefreshLayout
 import kotlinx.android.synthetic.main.activity_base_web.*
@@ -31,6 +31,8 @@ class MainActivity : BaseWebActivity() {
 
     companion object {
         const val TAG = "MainActivity"
+
+        const val REQUEST_CODE_SCAN = 0
     }
 
     private var curUrl: String? = null
@@ -104,14 +106,25 @@ class MainActivity : BaseWebActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == 1) {
-                data?.apply {
-                    val content = getStringExtra("rfid_data")
-                    logE(TAG, content)
-                    agentWeb.jsAccessEntrace.quickCallJs(
-                        "andriodCallH5",
-                        content
-                    )
+            when (requestCode) {
+                REQUEST_CODE_SCAN -> {
+                    data?.apply {
+                        val bundle = extras
+                        val result =
+                            bundle.getSerializable("data") as ArrayList<HashMap<String, String>>
+                        val iterator = result.iterator()
+                        while (iterator.hasNext()) {
+                            val hashMap = iterator.next()
+                            val scanType = hashMap["TYPE"] ?: "未知扫码类型"
+                            val scanValue = hashMap["VALUE"] ?: "无扫码结果"
+                            val scanInfo = ScanInfo(scanType, scanValue)
+                            logE("SCAN", scanInfo.toJson())
+                            agentWeb.jsAccessEntrace.quickCallJs(
+                                "andriodCallH5",
+                                scanInfo.toJson()
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -128,7 +141,8 @@ class MainActivity : BaseWebActivity() {
     override fun getAndroidInterface(): AndroidInterface {
         return AndroidInterface(this, agentWeb, object : AndroidInterface.IJsListener {
 
-            override fun printMsg(msg: String) {
+            override fun printJsContent(msg: String) {
+                logE("PAPA", "printMsg")
                 try {
 //                    val test = "{\"payInfo\":{\"consumeAddr\":\"啪啪运动第一运动公园\",\"consumeType\":\"门票\",\"fieldName\":\"啪啪运动第一运动公园\",\"printTime\":\"\",\"total\":\"0.03\",\"offer\":\"0.03\",\"payType\":\"现金\",\"payTime\":\"2019-07-06 16:39:43\",\"ticketList\":[{\"count\":\"1\",\"name\":\"游泳日票\",\"price\":\"0.01\"},{\"count\":\"1\",\"name\":\"大熊测试\",\"price\":\"0.02\"}],\"remark\":\"\"},\"ticketInfo\":[]}"
                     val printInfo = JSON.parseObject(msg, PrintInfo::class.java)
@@ -138,21 +152,32 @@ class MainActivity : BaseWebActivity() {
                 }
             }
 
-            override fun startScan() {
+            override fun androidGetCode() {
+                logE("PAPA", "startScan")
             }
 
             override fun turnOnNFC() {
+                logE("PAPA", "turnOnNFC")
+                bootScanner()
             }
 
             override fun turnOffNFC() {
+                logE("PAPA", "turnOffNFC")
             }
 
             override fun turnOnRFID() {
+                logE("PAPA", "turnOnRFID")
             }
 
             override fun turnOffRFID() {
             }
         })
+    }
+
+    private fun bootScanner() {
+        val intent = Intent("com.sunmi.scan")
+        intent.setPackage("com.sunmi.sunmiqrcodescanner")
+        startActivityForResult(intent, REQUEST_CODE_SCAN)
     }
 
     override fun getAgentWebSettings(): AbsAgentWebSettings {
@@ -270,7 +295,7 @@ class MainActivity : BaseWebActivity() {
 
     override fun getPermissionInterceptor(): PermissionInterceptor? {
         return PermissionInterceptor { url, permissions, action ->
-            LogUtils.logE(TAG, "url:$url permission:$permissions action:$action")
+            logE(TAG, "url:$url permission:$permissions action:$action")
             false
         }
     }

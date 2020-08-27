@@ -23,7 +23,7 @@ class AndroidInterface(val context: Context, val agentWeb: AgentWeb, val jsListe
         deliver.post {
             Log.i("Info", "main Thread:" + Thread.currentThread())
 //            Toast.makeText(context.applicationContext, "" + msg, Toast.LENGTH_LONG).show()
-            jsListener.printMsg(msg)
+            jsListener.printJsContent(msg)
         }
 
 
@@ -35,7 +35,7 @@ class AndroidInterface(val context: Context, val agentWeb: AgentWeb, val jsListe
     fun calledByJs(msg: String) {
         deliver.post {
             //            ToastUtils.showToastShort(msg)
-            jsListener.printMsg(msg)
+            jsListener.printJsContent(msg)
         }
     }
 
@@ -45,7 +45,7 @@ class AndroidInterface(val context: Context, val agentWeb: AgentWeb, val jsListe
     @JavascriptInterface
     fun scanQRCode() {
         deliver.post {
-            jsListener.startScan()
+            jsListener.androidGetCode()
         }
     }
 
@@ -95,13 +95,13 @@ class AndroidInterface(val context: Context, val agentWeb: AgentWeb, val jsListe
     @JavascriptInterface
     fun printJsContent(content: String) {
         deliver.post {
-            jsListener.printMsg(content)
+            jsListener.printJsContent(content)
         }
     }
 
     interface IJsListener {
-        fun printMsg(msg: String)
-        fun startScan()
+        fun printJsContent(msg: String)
+        fun androidGetCode()
         fun turnOnNFC()
         fun turnOffNFC()
         fun turnOnRFID()
