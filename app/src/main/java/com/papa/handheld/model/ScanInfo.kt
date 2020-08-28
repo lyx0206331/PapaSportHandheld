@@ -24,7 +24,7 @@ import com.alibaba.fastjson.JSON
  * date:2020/8/28 0028 3:20
  * description:
  **/
-class ScanInfo(val scanType: String, val scanValue: String) {
+class ScanInfo(/*val scanType: String, val scanValue: String*/val idNumber: String) {
 
     fun toJson(): String {
         return JSON.toJSONString(this)

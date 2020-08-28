@@ -117,10 +117,10 @@ class MainActivity : BaseWebActivity() {
                             val hashMap = iterator.next()
                             val scanType = hashMap["TYPE"] ?: "未知扫码类型"
                             val scanValue = hashMap["VALUE"] ?: "无扫码结果"
-                            val scanInfo = ScanInfo(scanType, scanValue)
+                            val scanInfo = ScanInfo(scanValue)
                             logE("SCAN", scanInfo.toJson())
                             agentWeb.jsAccessEntrace.quickCallJs(
-                                "andriodCallH5",
+                                "androidCallH5",
                                 scanInfo.toJson()
                             )
                         }
@@ -152,13 +152,19 @@ class MainActivity : BaseWebActivity() {
                 }
             }
 
-            override fun androidGetCode() {
+            override fun startScan() {
                 logE("PAPA", "startScan")
+                try {
+                    bootScanner()
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                    showToastShort("扫码功能启动异常,请检查设备!")
+                }
             }
 
             override fun turnOnNFC() {
                 logE("PAPA", "turnOnNFC")
-                bootScanner()
+//                bootScanner()
             }
 
             override fun turnOffNFC() {

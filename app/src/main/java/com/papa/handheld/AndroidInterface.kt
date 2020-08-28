@@ -43,9 +43,9 @@ class AndroidInterface(val context: Context, val agentWeb: AgentWeb, val jsListe
      * 扫描二维码
      */
     @JavascriptInterface
-    fun scanQRCode() {
+    fun androidGetCode() {
         deliver.post {
-            jsListener.androidGetCode()
+            jsListener.startScan()
         }
     }
 
@@ -101,7 +101,7 @@ class AndroidInterface(val context: Context, val agentWeb: AgentWeb, val jsListe
 
     interface IJsListener {
         fun printJsContent(msg: String)
-        fun androidGetCode()
+        fun startScan()
         fun turnOnNFC()
         fun turnOffNFC()
         fun turnOnRFID()
