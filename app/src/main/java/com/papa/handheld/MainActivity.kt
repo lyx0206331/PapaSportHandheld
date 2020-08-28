@@ -72,7 +72,6 @@ class MainActivity : BaseWebActivity() {
 */
         permissionUtil.requestPermission(permissions, object : PermissionUtil.IPermissionCallback {
             override fun allowedPermissions() {
-                logE("req permission", "permissions1")
             }
 
             override fun deniedPermissions() {
@@ -117,7 +116,7 @@ class MainActivity : BaseWebActivity() {
                             val hashMap = iterator.next()
                             val scanType = hashMap["TYPE"] ?: "未知扫码类型"
                             val scanValue = hashMap["VALUE"] ?: "无扫码结果"
-                            val scanInfo = ScanInfo(scanValue)
+                            val scanInfo = ScanInfo(scanType, scanValue)
                             logE("SCAN", scanInfo.toJson())
                             agentWeb.jsAccessEntrace.quickCallJs(
                                 "androidCallH5",
