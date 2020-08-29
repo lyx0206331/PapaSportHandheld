@@ -5,6 +5,7 @@ import android.content.MutableContextWrapper
 import android.webkit.WebView
 import androidx.multidex.MultiDex
 import com.adrian.basemodule.BaseApplication
+import com.papa.handheld.printerUtil.SunmiPrintHelper
 
 /**
  * author:RanQing
@@ -22,6 +23,7 @@ class MyApplication : BaseApplication() {
         super.onCreate()
 
         val webView = WebView(MutableContextWrapper(this))
+        SunmiPrintHelper.getInstance().initSunmiPrinterService(this)
     }
 
 }

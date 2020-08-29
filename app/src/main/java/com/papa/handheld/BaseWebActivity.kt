@@ -10,6 +10,7 @@ import androidx.annotation.ColorInt
 import com.adrian.basemodule.BaseActivity
 import com.adrian.basemodule.LogUtils
 import com.just.agentweb.*
+import com.papa.handheld.printerUtil.SunmiPrintHelper
 
 /**
  * author:RanQing
@@ -30,6 +31,7 @@ abstract class BaseWebActivity : BaseActivity() {
             .setNegativeButton(R.string.cancel) { dialog, _ -> dialog?.dismiss() }
             .setPositiveButton(R.string.confirm) { dialog, _ ->
                 dialog?.dismiss()
+                SunmiPrintHelper.getInstance().deInitSunmiPrinterService(this)
                 finish()
             }.create()
     }

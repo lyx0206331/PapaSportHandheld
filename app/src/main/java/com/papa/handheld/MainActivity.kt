@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.nfc.NdefMessage
 import android.os.Build
 import android.os.Bundle
 import android.view.ViewGroup
@@ -20,11 +21,12 @@ import com.adrian.basemodule.ToastUtils.showToastShort
 import com.adrian.basemodule.orFalse
 import com.alibaba.fastjson.JSON
 import com.just.agentweb.*
-import com.papa.handheld.model.DeviceInfo
-import com.papa.handheld.model.PrintInfo
-import com.papa.handheld.model.ScanInfo
+import com.papa.handheld.model.*
+import com.papa.handheld.nfcUtil.NFCUtils
+import com.papa.handheld.printerUtil.SunmiPrintHelper
 import com.papa.handheld.view.SmartRefreshWebLayout
 import com.scwang.smart.refresh.layout.SmartRefreshLayout
+import com.sunmi.peripheral.printer.InnerResultCallbcak
 import kotlinx.android.synthetic.main.activity_base_web.*
 
 class MainActivity : BaseWebActivity() {
@@ -48,11 +50,39 @@ class MainActivity : BaseWebActivity() {
         Manifest.permission.CAMERA
     )
 
+    private val nfcUtil = NFCUtils(this, object : NFCUtils.INFCListener {
+        override fun showNfcData(msgs: Array<out NdefMessage>?) {
+            msgs?.forEach {
+                it.records.forEach { child ->
+                    logE(TAG, "nfcData:$child")
+                }
+            }
+        }
+
+        override fun getIds(decTagId: Long, reversedId: Long) {
+            val jsonStr = NFCTagInfo("$decTagId", "$reversedId").toJsonString()
+            logE(TAG, jsonStr)
+            agentWeb.jsAccessEntrace.quickCallJs(
+                "androidCallH5",
+                jsonStr
+            )
+        }
+    })
+//    private val nfcAdapter by lazy {
+//        NfcAdapter.getDefaultAdapter(this)
+//    }
+//    private val pendingIntent by lazy {
+//        PendingIntent.getActivity(this, 0, Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0)
+//    }
+//    private val ndefPushMessage =NdefMessage(arrayOf(nfcUtil.newTextRecord("", Locale.ENGLISH, true)))
+//    private var isNfcOpen = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             window.statusBarColor = ContextCompat.getColor(this, R.color.title_bg_color)
         }
         super.onCreate(savedInstanceState)
+        SunmiPrintHelper.getInstance().initPrinter()
 
         /*setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -102,6 +132,10 @@ class MainActivity : BaseWebActivity() {
         super.onDestroy()
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
@@ -141,10 +175,13 @@ class MainActivity : BaseWebActivity() {
         return AndroidInterface(this, agentWeb, object : AndroidInterface.IJsListener {
 
             override fun printJsContent(msg: String) {
-                logE("PAPA", "printMsg")
+                logE("PAPA", "printMsg: $msg")
                 try {
-//                    val test = "{\"payInfo\":{\"consumeAddr\":\"啪啪运动第一运动公园\",\"consumeType\":\"门票\",\"fieldName\":\"啪啪运动第一运动公园\",\"printTime\":\"\",\"total\":\"0.03\",\"offer\":\"0.03\",\"payType\":\"现金\",\"payTime\":\"2019-07-06 16:39:43\",\"ticketList\":[{\"count\":\"1\",\"name\":\"游泳日票\",\"price\":\"0.01\"},{\"count\":\"1\",\"name\":\"大熊测试\",\"price\":\"0.02\"}],\"remark\":\"\"},\"ticketInfo\":[]}"
-                    val printInfo = JSON.parseObject(msg, PrintInfo::class.java)
+//                    val test = "{\"ticket_code\":\"T00001yI492\",\"face_value\":\"50.00\",\"pay_price\":\"50.00\",\"member_id\":0,\"member_card_id\":0,\"date_str\":\"2020-08-27\",\"start_date\":\"2020-08-27\",\"end_date\":\"2020-12-04\",\"status\":3,\"status_str\":\"已检票\",\"ticket_name\":\"向上票\",\"valid_time\":100,\"valid_num\":1000,\"valid_type\":2,\"sport_tag_id\":1,\"member_type\":\"1,4,14\",\"session_name\":\"羽毛球（午夜）\",\"no\":null,\"from\":\"现场购票\",\"name\":\"--\",\"phone\":\"--\",\"member_type_str\":\"普通会员,教职工,testA\",\"stadium_name\":\"深圳大运中心\"}"
+                    val ticketInfo = JSON.parseObject(msg, TicketData::class.java)
+                    ticketInfo?.ticketInfo?.let {
+                        startPrint(it)
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     showToastShort("数据解析异常")
@@ -154,7 +191,7 @@ class MainActivity : BaseWebActivity() {
             override fun startScan() {
                 logE("PAPA", "startScan")
                 try {
-                    bootScanner()
+                    this@MainActivity.startScan()
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
                     showToastShort("扫码功能启动异常,请检查设备!")
@@ -162,12 +199,24 @@ class MainActivity : BaseWebActivity() {
             }
 
             override fun turnOnNFC() {
-                logE("PAPA", "turnOnNFC")
-//                bootScanner()
+//                val nfcEnable = nfcAdapter != null && nfcAdapter.isEnabled
+//                logE("PAPA", "turnOnNFC:$nfcEnable")
+//                if (nfcEnable) {
+//                    nfcAdapter.enableForegroundDispatch(
+//                        this@MainActivity,
+//                        pendingIntent,
+//                        null,
+//                        null
+//                    )
+//                } else {
+//                    ToastUtils.showToastShort("请确认设备具有NFC功能，且已打开")
+//                }
+//                testPrint()
             }
 
             override fun turnOffNFC() {
                 logE("PAPA", "turnOffNFC")
+//                nfcAdapter.disableForegroundDispatch(this@MainActivity)
             }
 
             override fun turnOnRFID() {
@@ -179,7 +228,48 @@ class MainActivity : BaseWebActivity() {
         })
     }
 
-    private fun bootScanner() {
+    private fun testPrint() {
+        try {
+            val test =
+                "{\"ticketInfo\":{\"ticket_code\":\"T00yX001520\",\"face_value\":\"0.01\",\"pay_price\":\"1.00\",\"member_id\":171,\"member_card_id\":711,\"date_str\":\"2020-08-29\",\"start_date\":\"2020-08-29\",\"end_date\":\"2020-12-06\",\"status\":3,\"status_str\":\"已检票\",\"ticket_name\":\"111111111111\",\"valid_time\":100,\"valid_num\":1,\"valid_type\":2,\"sport_tag_id\":2,\"member_type\":\"1,46,4,14,23,24,28,35,36,42\",\"session_name\":\"篮球周末场次\",\"no\":null,\"from\":\"现场购票\",\"name\":\"囧囧\",\"phone\":\"18566766922\",\"card_num\":\"963084089683\",\"member_type_str\":\"普通会员,测试类型aa,教职工,testA,学生A2,职工家属,客户类型11,12,hi,儿童3\",\"stadium_name\":\"深圳大运中心\"}}"
+            val ticketInfo = JSON.parseObject(test, TicketData::class.java)
+            ticketInfo?.ticketInfo?.let {
+                startPrint(it)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            showToastShort("数据解析异常")
+        }
+    }
+
+    /**
+     * 开始打印
+     */
+    private fun startPrint(ticketInfo: TicketInfo) {
+        SunmiPrintHelper.getInstance().printTrans(this, ticketInfo, object : InnerResultCallbcak() {
+            override fun onRunResult(p0: Boolean) {
+            }
+
+            override fun onReturnString(p0: String?) {
+            }
+
+            override fun onRaiseException(p0: Int, p1: String?) {
+            }
+
+            override fun onPrintResult(p0: Int, p1: String?) {
+                logE(
+                    TAG,
+                    if (p0 == 0) "Transaction print successful!" else "Transaction print failed!"
+                )
+            }
+        })
+//        SunmiPrintHelper.getInstance().feedPaper()
+    }
+
+    /**
+     * 启动扫码
+     */
+    private fun startScan() {
         val intent = Intent("com.sunmi.scan")
         intent.setPackage("com.sunmi.sunmiqrcodescanner")
         startActivityForResult(intent, REQUEST_CODE_SCAN)
@@ -241,19 +331,10 @@ class MainActivity : BaseWebActivity() {
                             "getImei",
                             deviceInfoJson
                         )
-//                        toolbar.visibility = View.GONE
-//                        ibHome.visibility = View.GONE
-//                        btnQuit.visibility = View.GONE
                     }
                     url?.endsWith("index").orFalse() -> {
-//                        toolbar.visibility = View.VISIBLE
-//                        btnQuit.visibility = View.VISIBLE
-//                        ibHome.visibility = View.GONE
                     }
                     else -> {
-//                        toolbar.visibility = View.VISIBLE
-//                        btnQuit.visibility = View.GONE
-//                        ibHome.visibility = View.VISIBLE
                     }
                 }
                 curUrl = url
@@ -319,13 +400,12 @@ class MainActivity : BaseWebActivity() {
 
     override fun getUrl(): String {
         //papa 123456
-        return if (BuildConfig.DEBUG) {
+        /*return if (BuildConfig.DEBUG) {
             "http://demo.handtest.papa.com.cn:8280"
         } else {
             "http://papa.hand.ppdev.fun:8180"
-        }
-//        return "https://pda.papa.com.cn"
-//        return "http://192.168.1.12:8039"
+        }*/
+        return "http://papa.hand.ppdev.fun:8180"
     }
 
 }
