@@ -84,9 +84,15 @@ def releaseTime() {
     return new Date().format("yyyy-MM-dd-HH-mm", TimeZone.getTimeZone("GMT+8"))
 }
 
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation project(path: ':basemodule')
+    implementation (name:'PayLib-release-1.4.41', ext:'aar')
     implementation rootProject.ext.dependencies.agentWeb
     implementation rootProject.ext.dependencies.fastJson
     implementation rootProject.ext.dependencies.androidAppCompatV7
@@ -100,5 +106,6 @@ dependencies {
     implementation 'com.sunmi:printerlibrary:1.0.9'
     //zxing to generate barcode
     implementation files('libs/core-3.3.0.jar')
+    implementation files('libs\\PayLib-release-1.4.41-sources.jar')
 
 }

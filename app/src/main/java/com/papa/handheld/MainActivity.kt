@@ -5,9 +5,9 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.nfc.NdefMessage
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -21,13 +21,22 @@ import com.adrian.basemodule.ToastUtils.showToastShort
 import com.adrian.basemodule.orFalse
 import com.alibaba.fastjson.JSON
 import com.just.agentweb.*
-import com.papa.handheld.model.*
-import com.papa.handheld.nfcUtil.NFCUtils
+import com.papa.handheld.model.DeviceInfo
+import com.papa.handheld.model.ScanInfo
+import com.papa.handheld.model.TicketData
+import com.papa.handheld.model.TicketInfo
 import com.papa.handheld.printerUtil.SunmiPrintHelper
+import com.papa.handheld.util.Utility
 import com.papa.handheld.view.SmartRefreshWebLayout
 import com.scwang.smart.refresh.layout.SmartRefreshLayout
+import com.sunmi.pay.hardware.aidl.AidlConstants
+import com.sunmi.pay.hardware.aidlv2.readcard.CheckCardCallbackV2
+import com.sunmi.pay.hardware.aidlv2.readcard.ReadCardOptV2
+import com.sunmi.pay.hardware.aidlv2.system.BasicOptV2
 import com.sunmi.peripheral.printer.InnerResultCallbcak
 import kotlinx.android.synthetic.main.activity_base_web.*
+import sunmi.paylib.SunmiPayKernel
+import java.util.*
 
 class MainActivity : BaseWebActivity() {
 
@@ -50,32 +59,11 @@ class MainActivity : BaseWebActivity() {
         Manifest.permission.CAMERA
     )
 
-    private val nfcUtil = NFCUtils(this, object : NFCUtils.INFCListener {
-        override fun showNfcData(msgs: Array<out NdefMessage>?) {
-            msgs?.forEach {
-                it.records.forEach { child ->
-                    logE(TAG, "nfcData:$child")
-                }
-            }
-        }
+    var basicOptV2: BasicOptV2? = null
+    var readCardOptV2: ReadCardOptV2? = null
+    val smPayKernel = SunmiPayKernel.getInstance()
 
-        override fun getIds(decTagId: Long, reversedId: Long) {
-            val jsonStr = NFCTagInfo("$decTagId", "$reversedId").toJsonString()
-            logE(TAG, jsonStr)
-            agentWeb.jsAccessEntrace.quickCallJs(
-                "androidCallH5",
-                jsonStr
-            )
-        }
-    })
-//    private val nfcAdapter by lazy {
-//        NfcAdapter.getDefaultAdapter(this)
-//    }
-//    private val pendingIntent by lazy {
-//        PendingIntent.getActivity(this, 0, Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0)
-//    }
-//    private val ndefPushMessage =NdefMessage(arrayOf(nfcUtil.newTextRecord("", Locale.ENGLISH, true)))
-//    private var isNfcOpen = false
+    private val handler = Handler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
@@ -109,6 +97,18 @@ class MainActivity : BaseWebActivity() {
             }
         })
 
+        smPayKernel.initPaySDK(this, object : SunmiPayKernel.ConnectCallback {
+            override fun onConnectPaySDK() {
+                basicOptV2 = smPayKernel.mBasicOptV2
+                readCardOptV2 = smPayKernel.mReadCardOptV2
+                logE(TAG, "read card connected")
+            }
+
+            override fun onDisconnectPaySDK() {
+                logE(TAG, "read card disconnect")
+            }
+        })
+
     }
 
     override fun onRequestPermissionsResult(
@@ -130,6 +130,7 @@ class MainActivity : BaseWebActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        smPayKernel.destroyPaySDK()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -199,24 +200,13 @@ class MainActivity : BaseWebActivity() {
             }
 
             override fun turnOnNFC() {
-//                val nfcEnable = nfcAdapter != null && nfcAdapter.isEnabled
-//                logE("PAPA", "turnOnNFC:$nfcEnable")
-//                if (nfcEnable) {
-//                    nfcAdapter.enableForegroundDispatch(
-//                        this@MainActivity,
-//                        pendingIntent,
-//                        null,
-//                        null
-//                    )
-//                } else {
-//                    ToastUtils.showToastShort("请确认设备具有NFC功能，且已打开")
-//                }
 //                testPrint()
+                checkCard()
             }
 
             override fun turnOffNFC() {
                 logE("PAPA", "turnOffNFC")
-//                nfcAdapter.disableForegroundDispatch(this@MainActivity)
+                cancleCheckCard()
             }
 
             override fun turnOnRFID() {
@@ -273,6 +263,82 @@ class MainActivity : BaseWebActivity() {
         val intent = Intent("com.sunmi.scan")
         intent.setPackage("com.sunmi.sunmiqrcodescanner")
         startActivityForResult(intent, REQUEST_CODE_SCAN)
+    }
+
+    private fun checkCard() {
+        readCardOptV2?.checkCard(
+            AidlConstants.CardType.MAGNETIC.value.or(AidlConstants.CardType.NFC.value)
+                .or(
+                    AidlConstants.CardType.IC.value
+                ), object : CheckCardCallbackV2.Stub() {
+                override fun findMagCard(info: Bundle?) {
+                    logE(TAG, "findMagCard, bundle:${Utility.bundle2String(info)}")
+                    handleResult(info)
+                }
+
+                override fun findICCard(atr: String?) {
+                    logE(TAG, "findICCard.atr:$atr")
+                    showToastShort("atr:$atr")
+                }
+
+                override fun findRFCard(uuid: String?) {
+                    logE(TAG, "findRFCard. uuid:$uuid")
+                    showToastShort("uuid:$uuid")
+                }
+
+                override fun onError(code: Int, message: String?) {
+                    logE(TAG, "onError.code:$code  || msg:$message")
+                    handleResult(null)
+                }
+
+                override fun findICCardEx(info: Bundle?) {
+                    logE(TAG, "findICCardEx, info: ${Utility.bundle2String(info)}")
+                }
+
+                override fun findRFCardEx(info: Bundle?) {
+                    logE(TAG, "findRFCardEx, info: ${Utility.bundle2String(info)}")
+                }
+
+                override fun onErrorEx(info: Bundle?) {
+                    logE(TAG, "onErrorEx, info: ${Utility.bundle2String(info)}")
+                }
+
+            }, 60
+        )
+    }
+
+    private fun cancleCheckCard() {
+        readCardOptV2?.cancelCheckCard()
+    }
+
+    private fun handleResult(bundle: Bundle?) {
+        if (isFinishing) return
+        handler.post {
+            if (bundle == null) {
+                showToastShort("无效卡")
+            } else {
+                val track1 = Utility.null2String(bundle.getString("TRACK1"))
+                val track2 = Utility.null2String(bundle.getString("TRACK2"))
+                val track3 = Utility.null2String(bundle.getString("TRACK3"))
+
+                //磁道错误码：0-无错误，-1-磁道无数据，-2-奇偶校验错，-3-LRC校验错
+                val code1 = bundle.getInt("track1ErrorCode")
+                val code2 = bundle.getInt("track2ErrorCode")
+                val code3 = bundle.getInt("track3ErrorCode")
+
+                val logMsg = String.format(
+                    Locale.getDefault(),
+                    "track1ErrorCode:%d,track1:%s\ntrack2ErrorCode:%d,track2:%s\ntrack3ErrorCode:%d,track3:%s",
+                    code1, track1, code2, track2, code3, track3
+                )
+                logE(TAG, logMsg)
+                showToastShort(logMsg)
+
+                if (!isFinishing) {
+                    handler.postDelayed(this::checkCard, 500)
+                }
+            }
+        }
     }
 
     override fun getAgentWebSettings(): AbsAgentWebSettings {
