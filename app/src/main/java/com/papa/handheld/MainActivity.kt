@@ -277,44 +277,45 @@ class MainActivity : BaseWebActivity() {
                 }
 
                 override fun findICCard(atr: String?) {
-                    logE(TAG, "findICCard.atr:$atr")
-                    showToastShort("atr:$atr")
-                    callWebInterface(
-                        jsonInfo = JSON.toJSONString(
-                            CardInfo(
-                                CardInfo.getCardType(
-                                    CardInfo.TYPE_IC_CARD
-                                ), atr
-                            )
+                    val jsonInfo = JSON.toJSONString(
+                        CardInfo(
+                            CardInfo.getCardType(
+                                CardInfo.TYPE_IC_CARD
+                            ), CardValue(atr = atr)
                         )
+                    )
+                    logE(TAG, "findICCard.atr:$jsonInfo")
+                    callWebInterface(
+                        jsonInfo = jsonInfo
                     )
                 }
 
                 override fun findRFCard(uuid: String?) {
-                    logE(TAG, "findRFCard. uuid:$uuid")
-                    showToastShort("uuid:$uuid")
-                    callWebInterface(
-                        jsonInfo = JSON.toJSONString(
-                            CardInfo(
-                                CardInfo.getCardType(
-                                    CardInfo.TYPE_NFC_CARD
-                                ), uuid
-                            )
+                    val jsonInfo = JSON.toJSONString(
+                        CardInfo(
+                            CardInfo.getCardType(
+                                CardInfo.TYPE_NFC_CARD
+                            ), CardValue(uuid = uuid)
                         )
+                    )
+                    logE(TAG, "findRFCard. uuid:$jsonInfo")
+                    callWebInterface(
+                        jsonInfo = jsonInfo
                     )
                 }
 
                 override fun onError(code: Int, message: String?) {
-                    logE(TAG, "onError.code:$code  || msg:$message")
-                    handleResult(null)
-                    callWebInterface(
-                        jsonInfo = JSON.toJSONString(
-                            CardInfo(
-                                CardInfo.getCardType(
-                                    CardInfo.TYPE_INVALID_CARD
-                                ), "$code -- $message"
-                            )
+                    val jsonInfo = JSON.toJSONString(
+                        CardInfo(
+                            CardInfo.getCardType(
+                                CardInfo.TYPE_INVALID_CARD
+                            ), errorInfo = ErrorInfo(code, message)
                         )
+                    )
+                    logE(TAG, "onError.$jsonInfo")
+//                    handleResult(null)
+                    callWebInterface(
+                        jsonInfo = jsonInfo
                     )
                 }
 
@@ -353,13 +354,22 @@ class MainActivity : BaseWebActivity() {
                 val code2 = bundle.getInt("track2ErrorCode")
                 val code3 = bundle.getInt("track3ErrorCode")
 
+                val jsonInfo = JSON.toJSONString(
+                    CardInfo(
+                        CardInfo.getCardType(
+                            CardInfo.TYPE_INVALID_CARD
+                        ), CardValue(code1, track1, code2, track2, code3, track3)
+                    )
+                )
+
                 val logMsg = String.format(
                     Locale.getDefault(),
                     "track1ErrorCode:%d,track1:%s\ntrack2ErrorCode:%d,track2:%s\ntrack3ErrorCode:%d,track3:%s",
                     code1, track1, code2, track2, code3, track3
                 )
-                logE(TAG, logMsg)
-                showToastShort(logMsg)
+                logE(TAG, "mag card:$jsonInfo")
+//                showToastShort(logMsg)
+                callWebInterface(jsonInfo = jsonInfo)
 
 //                if (!isFinishing) {
 //                    handler.postDelayed(this::checkCard, 500)
