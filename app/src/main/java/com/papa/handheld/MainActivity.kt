@@ -21,10 +21,7 @@ import com.adrian.basemodule.ToastUtils.showToastShort
 import com.adrian.basemodule.orFalse
 import com.alibaba.fastjson.JSON
 import com.just.agentweb.*
-import com.papa.handheld.model.DeviceInfo
-import com.papa.handheld.model.ScanInfo
-import com.papa.handheld.model.TicketData
-import com.papa.handheld.model.TicketInfo
+import com.papa.handheld.model.*
 import com.papa.handheld.printerUtil.SunmiPrintHelper
 import com.papa.handheld.util.Utility
 import com.papa.handheld.view.SmartRefreshWebLayout
@@ -153,16 +150,19 @@ class MainActivity : BaseWebActivity() {
                             val scanValue = hashMap["VALUE"] ?: "无扫码结果"
                             val scanInfo = ScanInfo(scanType, scanValue)
                             logE("SCAN", scanInfo.toJson())
-                            agentWeb.jsAccessEntrace.quickCallJs(
-                                "androidCallH5",
-                                scanInfo.toJson()
-                            )
+                            callWebInterface(jsonInfo = scanInfo.toJson())
                         }
                     }
                 }
             }
         }
     }
+
+    /**
+     * 调用前端接口
+     */
+    private fun callWebInterface(interfaceName: String = "androidCallH5", jsonInfo: String) =
+        agentWeb.jsAccessEntrace.quickCallJs(interfaceName, jsonInfo)
 
     override fun addBGChild(frameLayout: FrameLayout) {
         frameLayout.setBackgroundColor(Color.TRANSPARENT)
@@ -279,16 +279,43 @@ class MainActivity : BaseWebActivity() {
                 override fun findICCard(atr: String?) {
                     logE(TAG, "findICCard.atr:$atr")
                     showToastShort("atr:$atr")
+                    callWebInterface(
+                        jsonInfo = JSON.toJSONString(
+                            CardInfo(
+                                CardInfo.getCardType(
+                                    CardInfo.TYPE_IC_CARD
+                                ), atr
+                            )
+                        )
+                    )
                 }
 
                 override fun findRFCard(uuid: String?) {
                     logE(TAG, "findRFCard. uuid:$uuid")
                     showToastShort("uuid:$uuid")
+                    callWebInterface(
+                        jsonInfo = JSON.toJSONString(
+                            CardInfo(
+                                CardInfo.getCardType(
+                                    CardInfo.TYPE_NFC_CARD
+                                ), uuid
+                            )
+                        )
+                    )
                 }
 
                 override fun onError(code: Int, message: String?) {
                     logE(TAG, "onError.code:$code  || msg:$message")
                     handleResult(null)
+                    callWebInterface(
+                        jsonInfo = JSON.toJSONString(
+                            CardInfo(
+                                CardInfo.getCardType(
+                                    CardInfo.TYPE_INVALID_CARD
+                                ), "$code -- $message"
+                            )
+                        )
+                    )
                 }
 
                 override fun findICCardEx(info: Bundle?) {
@@ -334,9 +361,9 @@ class MainActivity : BaseWebActivity() {
                 logE(TAG, logMsg)
                 showToastShort(logMsg)
 
-                if (!isFinishing) {
-                    handler.postDelayed(this::checkCard, 500)
-                }
+//                if (!isFinishing) {
+//                    handler.postDelayed(this::checkCard, 500)
+//                }
             }
         }
     }
@@ -393,10 +420,7 @@ class MainActivity : BaseWebActivity() {
                         val deviceInfoJson =
                             JSON.toJSONString(DeviceInfo(PhoneUtils.getDeviceId(this@MainActivity)))
                         logE(TAG, deviceInfoJson)
-                        agentWeb.jsAccessEntrace.quickCallJs(
-                            "getImei",
-                            deviceInfoJson
-                        )
+                        callWebInterface("getImei", deviceInfoJson)
                     }
                     url?.endsWith("index").orFalse() -> {
                     }
