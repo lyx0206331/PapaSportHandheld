@@ -505,7 +505,7 @@ class MainActivity : BaseWebActivity() {
         } else {
             "http://papa.hand.ppdev.fun:8180"
         }*/
-        return "http://papa.hand.ppdev.fun:8180"
+        return "http://demo.handtest.papa.com.cn:8280"
     }
 
 }
