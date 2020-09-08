@@ -8,4 +8,9 @@
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
     <string name="quit">退出</string>
+    <string name="settings">设置</string>
+    <string name="env_set">环境配置</string>
+    <string name="url">URL:</string>
+    <string name="hint">请输入服务器地址</string>
+    <string name="url_empty_tips">请输入有效服务器地址</string>
 </resources>

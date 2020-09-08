@@ -24,6 +24,7 @@ import com.just.agentweb.*
 import com.papa.handheld.model.*
 import com.papa.handheld.printerUtil.SunmiPrintHelper
 import com.papa.handheld.util.Utility
+import com.papa.handheld.util.getHostUrl
 import com.papa.handheld.view.SmartRefreshWebLayout
 import com.scwang.smart.refresh.layout.SmartRefreshLayout
 import com.sunmi.pay.hardware.aidl.AidlConstants
@@ -505,7 +506,8 @@ class MainActivity : BaseWebActivity() {
         } else {
             "http://papa.hand.ppdev.fun:8180"
         }*/
-        return "http://demo.handtest.papa.com.cn:8280"
+//        return "http://demo.handtest.papa.com.cn:8280"
+        return getHostUrl()
     }
 
 }
