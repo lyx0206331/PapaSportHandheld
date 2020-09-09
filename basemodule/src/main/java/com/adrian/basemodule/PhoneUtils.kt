@@ -21,4 +21,20 @@ object PhoneUtils {
     fun getDeviceId(context: Context): String {
         return Settings.System.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     }
+
+    fun getVersionName(context: Context) =
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+
+    fun getVersionCode(context: Context) =
+        context.packageManager.getPackageInfo(context.packageName, 0).versionCode
+
+    fun getPackageName(context: Context) =
+        context.packageManager.getPackageInfo(context.packageName, 0).packageName
+
+    fun getAppName(context: Context) = context.getString(
+        context.packageManager.getPackageInfo(
+            context.packageName,
+            0
+        ).applicationInfo.labelRes
+    )
 }

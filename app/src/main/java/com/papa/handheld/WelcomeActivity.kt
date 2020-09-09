@@ -10,6 +10,7 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.adrian.basemodule.BaseActivity
+import com.adrian.basemodule.PhoneUtils
 import com.adrian.basemodule.ToastUtils
 import com.adrian.basemodule.orZero
 import com.papa.handheld.util.getHostUrl
@@ -70,6 +71,8 @@ class WelcomeActivity : BaseActivity() {
                 }
             }
         }
+
+        tvVersionName.text = "v${PhoneUtils.getVersionName(this)}"
     }
 
     override fun onResume() {
